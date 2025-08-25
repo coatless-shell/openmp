@@ -82,7 +82,7 @@ CPPFLAGS += -Xclang -fopenmp
 LDFLAGS += -lomp
 ```
 
-> [NOTE]
+> [!NOTE]
 > 
 > Once set, it will be applied universally across any package installations or
 > local script compilations.
@@ -111,11 +111,30 @@ Having difficulties or are unsure if you have OpenMP installed correctly? Use:
 
 
 ```bash
-# Check your installation
+# Download check script
 curl -O https://raw.githubusercontent.com/coatless-shell/openmp/main/check-openmp.sh
 chmod +x check-openmp.sh
+```
+
+### Full Tests (include R)
+
+```bash
+# Check your installation
 ./check-openmp.sh
 ```
+
+### C/C++ Only (Skips R tests)
+
+> [!NOTE]
+>
+> Not interested in R? No worries, you can safely skip those tests with `--disable-r`!
+
+```bash
+# C/C++ only tests (no R)
+./check-openmp.sh --disable-r
+```
+
+### Test Overview
 
 The `check-openmp.sh` script provides verification of your OpenMP setup with 5 test categories:
 
@@ -125,12 +144,12 @@ The `check-openmp.sh` script provides verification of your OpenMP setup with 5 t
 4. **R Configuration**: Checks `~/.R/Makevars` setup
 5. **Environment Variables**: Validates R session variables (only if Makevars not configured)
 
-The checker uses smart logic: if `~/.R/Makevars` is properly configured, it skips environment variable testing. 
-If not, it queries R directly to check session-specific settings using `Sys.getenv()`.
+The checker uses smart logic: 
 
-> [!NOTE]
-> 
-> Not interested in R? No worries, you can safely skip those failed tests.
+- R-specific tests are skipped if `--disable-r` is passed, e.g.
+    - Skip **4. R Configuration** and **5. Environment Variables** checks.
+- If `~/.R/Makevars` is properly configured, it skips **5. Environment Variables** testing.
+    - Otherwise, it queries R directly to check session-specific settings using `Sys.getenv()`.
 
 ## Uninstalling
 
@@ -156,6 +175,7 @@ Common issues and solutions:
 - **"Library not found"**: OpenMP isn't installed. Run `./install-openmp.sh`
 - **"Compilation failed"**: Check that Xcode Command Line Tools are installed (`sudo xcode-select --install`)
 - **"No parallelization"**: Verify configuration in `~/.R/Makevars` or R environment variables
+- **"R not found"**: Either install R or use `--disable-r` flag for C/C++ only testing
 
 ## Related
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# OpenMP Setup - Uninstaller for OpenMP runtime on macOS
-# Copyright (C) 2025
+# OpenMP Removal - Uninstaller for OpenMP runtime on macOS
+# Copyright (C) 2025: James J Balamuta
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
