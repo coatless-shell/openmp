@@ -54,56 +54,69 @@ echo "Detected Apple clang version: $CLANG_VERSION"
 # Map clang version to OpenMP version
 OPENMP_VERSION=""
 DARWIN_TARGET=""
+EXPECTED_SHA1=""
 BASE_URL="https://mac.r-project.org/openmp"
 
 case $CLANG_VERSION in
     1700)
         OPENMP_VERSION="19.1.0"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="42a22fa5852bafc23ab31241d064f9be9aab8a0d"
         ;;
     1600)
         OPENMP_VERSION="17.0.6"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="a89cab4e763025f03a5d12a93a609ff771ad209c"
         ;;
     1500)
         OPENMP_VERSION="16.0.4"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="591136d3c1cc26f3a21f1202a652be911bf1a2ad"
         ;;
     1403)
         OPENMP_VERSION="15.0.7"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="31f0be747101b2bdce3c01b4d1c9041959bb3b27"
         ;;
     1400)
         OPENMP_VERSION="14.0.6"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="19912991431ecf032f037b6e8aea19dbd490f1ba"
         ;;
     1316)
         OPENMP_VERSION="13.0.0"
         DARWIN_TARGET="darwin21"
+        EXPECTED_SHA1="47af4cb0d1f3554969f2ec9dee450d728ea30024"
         ;;
     1300)
         OPENMP_VERSION="12.0.1"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="4fab53ccc420ab882119256470af15c210d19e5e"
         ;;
     1205)
         OPENMP_VERSION="11.0.1"
         DARWIN_TARGET="darwin20"
+        EXPECTED_SHA1="0dcd19042f01c4f552914e2cf7a53186de397aa1"
         ;;
     1200)
         OPENMP_VERSION="10.0.0"
         DARWIN_TARGET="darwin17"
+        EXPECTED_SHA1="9bf16a64ab747528c5de7005a1ea1a9e318b3cf0"
         ;;
     1103)
         OPENMP_VERSION="9.0.1"
         DARWIN_TARGET="darwin17"
+        EXPECTED_SHA1="e5bd8501a3f957b4babe27b0a266d4fa15dbc23f"
         ;;
     1100)
         OPENMP_VERSION="8.0.1"
         DARWIN_TARGET="darwin17"
+        EXPECTED_SHA1="e4612bfcb1bf520bf22844f7db764cadb7577c28"
         ;;
     1001)
         OPENMP_VERSION="7.1.0"
         DARWIN_TARGET="darwin17"
+        EXPECTED_SHA1="6891ff6f83f2ed83eeed42160de819b50cf643cd"
         ;;
     *)
         echo -e "${RED}Error: Unsupported clang version $CLANG_VERSION${NC}"
@@ -153,6 +166,26 @@ if curl -f -O "$DOWNLOAD_URL"; then
 else
     echo -e "${RED}Error: Failed to download $TARBALL${NC}"
     echo "Please check your internet connection and try again."
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Verify SHA1 checksum
+echo "Verifying file integrity..."
+ACTUAL_SHA1=$(shasum -a 1 "$TARBALL" | cut -d' ' -f1)
+if [[ "$ACTUAL_SHA1" == "$EXPECTED_SHA1" ]]; then
+    echo -e "${GREEN}Checksum verification passed.${NC}"
+else
+    echo -e "${RED}Error: Checksum verification failed!${NC}"
+    echo "Expected SHA1: $EXPECTED_SHA1"
+    echo "Actual SHA1:   $ACTUAL_SHA1"
+    echo ""
+    echo "This could indicate:"
+    echo "- Corrupted download"
+    echo "- Network interference" 
+    echo "- Potential security issue"
+    echo ""
+    echo "Please try downloading again or check the official source."
     rm -rf "$TEMP_DIR"
     exit 1
 fi

@@ -173,6 +173,7 @@ Common issues and solutions:
 
 - **"Unsupported clang version"**: Your Xcode version isn't supported. Check [mac.r-project.org/openmp](https://mac.r-project.org/openmp/) for updates
 - **"Library not found"**: OpenMP isn't installed. Run `./install-openmp.sh`
+- **"Checksum verification failed"**: Download was corrupted. Try running the installer again or check your network connection
 - **"Compilation failed"**: Check that Xcode Command Line Tools are installed (`sudo xcode-select --install`)
 - **"No parallelization"**: Verify configuration in `~/.R/Makevars` or R environment variables
 - **"R not found"**: Either install R or use `--disable-r` flag for C/C++ only testing
