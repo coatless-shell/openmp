@@ -25,6 +25,86 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Help function
+show_help() {
+    echo -e "${GREEN}OpenMP Setup for R on macOS${NC}"
+    echo "========================================="
+    echo ""
+    echo "DESCRIPTION:"
+    echo "    Automatically installs the appropriate OpenMP runtime library for your"
+    echo "    macOS system based on the detected Apple clang version."
+    echo ""
+    echo "USAGE:"
+    echo "    $0 [OPTIONS]"
+    echo ""
+    echo "OPTIONS:"
+    echo "    -h, --help          Show this help message and exit"
+    echo "    -y, --yes, --force  Skip confirmation prompts (non-interactive mode)"
+    echo ""
+    echo "ENVIRONMENT VARIABLES:"
+    echo "    NONINTERACTIVE      Set to 'true' to skip all prompts (alternative to --yes)"
+    echo ""
+    echo "EXAMPLES:"
+    echo "    # Interactive installation (default)"
+    echo "    $0"
+    echo ""
+    echo "    # Non-interactive installation (for CI/CD)"
+    echo "    $0 --yes"
+    echo ""
+    echo "    # Using environment variable"
+    echo "    NONINTERACTIVE=true $0"
+    echo ""
+    echo "    # Piped from URL"
+    echo "    curl -fsSL <URL> | bash -s -- --yes"
+    echo ""
+    echo "REQUIREMENTS:"
+    echo "    - macOS (darwin)"
+    echo "    - Xcode command line tools (xcode-select --install)"
+    echo "    - sudo privileges for installation to /usr/local/"
+    echo ""
+    echo -e "${YELLOW}SUPPORTED VERSIONS:${NC}"
+    echo "    Xcode 16.3+         → OpenMP 19.1.0"
+    echo "    Xcode 16.0-16.2     → OpenMP 17.0.6"
+    echo "    Xcode 15.x          → OpenMP 16.0.4"
+    echo "    Xcode 14.3.x        → OpenMP 15.0.7"
+    echo "    Xcode 14.0-14.2     → OpenMP 14.0.6"
+    echo "    Xcode 13.3-13.4.1   → OpenMP 13.0.0"
+    echo "    Xcode 13.0-13.2.1   → OpenMP 12.0.1"
+    echo "    Xcode 12.5          → OpenMP 11.0.1"
+    echo "    Xcode 12.0-12.4     → OpenMP 10.0.0"
+    echo "    Xcode 11.4-11.7     → OpenMP 9.0.1"
+    echo "    Xcode 11.0-11.3.1   → OpenMP 8.0.1"
+    echo "    Xcode 10.2-10.3     → OpenMP 7.1.0"
+    echo ""
+    echo "MORE INFO:"
+    echo "    https://mac.r-project.org/openmp/"
+    echo "    https://github.com/coatless-shell/openmp"
+    echo ""
+    exit 0
+}
+
+# Parse command line arguments
+FORCE_INSTALL=false
+NONINTERACTIVE=${NONINTERACTIVE:-false}
+
+for arg in "$@"; do
+    case $arg in
+        -h|--help)
+            show_help
+            ;;
+        -y|--yes|--force)
+            FORCE_INSTALL=true
+            NONINTERACTIVE=true
+            shift
+            ;;
+        *)
+            echo -e "${RED}Error: Unknown option '$arg'${NC}"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 echo -e "${GREEN}OpenMP Setup for R on macOS${NC}"
 echo "========================================="
 
@@ -50,6 +130,8 @@ if [[ -z "$CLANG_VERSION" ]]; then
 fi
 
 echo "Detected Apple clang version: $CLANG_VERSION"
+
+
 
 # Map clang version to OpenMP version
 OPENMP_VERSION=""
@@ -148,11 +230,15 @@ echo "Download URL: $DOWNLOAD_URL"
 # Check if already installed
 if [[ -f "/usr/local/lib/libomp.dylib" ]]; then
     echo -e "${YELLOW}OpenMP library already exists at /usr/local/lib/libomp.dylib${NC}"
-    read -p "Do you want to reinstall? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled."
-        exit 0
+    if [[ "$FORCE_INSTALL" == "true" || "$NONINTERACTIVE" == "true" ]]; then
+        echo "Non-interactive mode: proceeding with reinstallation..."
+    else
+        read -p "Do you want to reinstall? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled."
+            exit 0
+        fi
     fi
 fi
 
