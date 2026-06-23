@@ -63,6 +63,8 @@ render_help() {
 }
 
 render_readme() {
+  printf '| Xcode Version | Apple Clang | OpenMP Version | Download |\n'
+  printf '|---------------|-------------|----------------|----------|\n'
   while IFS=$'\t' read -r clang ver darwin sha xcode; do
     local short="${xcode#Xcode }"
     local file="openmp-${ver}-${darwin}-Release.tar.gz"

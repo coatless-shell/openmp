@@ -14,6 +14,8 @@ help_out=$(printf '%s\n' "$rec" | render_help)
 assert_eq "$help_out" '    echo "    Xcode 16.3-26.3  → OpenMP 19.1.5"' "render_help single tier"
 
 readme_out=$(printf '%s\n' "$rec" | render_readme)
-want_readme='| 16.3-26.3 | 1700.x | 19.1.5 | [openmp-19.1.5-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-19.1.5-darwin20-Release.tar.gz) |'
+want_readme='| Xcode Version | Apple Clang | OpenMP Version | Download |
+|---------------|-------------|----------------|----------|
+| 16.3-26.3 | 1700.x | 19.1.5 | [openmp-19.1.5-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-19.1.5-darwin20-Release.tar.gz) |'
 assert_eq "$readme_out" "$want_readme" "render_readme single tier"
 echo "PASS: test-render"
