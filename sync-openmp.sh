@@ -103,12 +103,22 @@ resolve_sha() {
 # replace_block <file> <begin_substr> <end_substr> <content_file>
 replace_block() {
   local file="$1" begin="$2" end="$3" content="$4" tmp
+  local nb ne
+  nb=$(grep -cF -- "$begin" "$file") || true
+  ne=$(grep -cF -- "$end"   "$file") || true
+  if [ "$nb" != 1 ] || [ "$ne" != 1 ]; then
+    echo "ERROR: replace_block: markers not found exactly once in $file (begin=$nb end=$ne)" >&2
+    return 1
+  fi
+  local mode
+  mode=$(stat -f '%Lp' "$file" 2>/dev/null || stat -c '%a' "$file")
   tmp=$(mktemp)
   awk -v b="$begin" -v e="$end" -v cf="$content" '
     index($0,b){print; while((getline line < cf)>0) print line; close(cf); skip=1; next}
     index($0,e){skip=0; print; next}
     !skip{print}
-  ' "$file" > "$tmp" && mv "$tmp" "$file"
+  ' "$file" > "$tmp" || { rm -f "$tmp"; return 1; }
+  chmod "$mode" "$tmp" && mv "$tmp" "$file"
 }
 
 # Build resolved records (compute-on-change) and the per-tier summary.

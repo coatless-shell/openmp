@@ -20,4 +20,16 @@ replace_block "$tmp" "BEGIN GENERATED X" "END GENERATED X" "$content"
 got=$(cat "$tmp"); rm -f "$tmp" "$content"
 want=$'head\n# >>> BEGIN GENERATED X (managed by sync-openmp.sh; do not edit) >>>\nNEW1\nNEW2\n# <<< END GENERATED X <<<\ntail'
 assert_eq "$got" "$want" "replace_block swaps between markers"
+# replace_block must refuse (non-zero, file unchanged) when END marker is absent
+tmp2=$(mktemp); content2=$(mktemp)
+printf 'head\n# >>> BEGIN GENERATED X (managed by sync-openmp.sh; do not edit) >>>\nOLD\ntail\n' > "$tmp2"
+printf 'NEW\n' > "$content2"
+orig2=$(cat "$tmp2")
+if OPENMP_SYNC_LIB=1 replace_block "$tmp2" "BEGIN GENERATED X" "END GENERATED X" "$content2" 2>/dev/null; then
+  fail "replace_block should return non-zero when END marker is missing"
+fi
+got2=$(cat "$tmp2")
+rm -f "$tmp2" "$content2"
+assert_eq "$got2" "$orig2" "replace_block leaves file unchanged when END marker is missing"
+
 echo "PASS: test-edit"
