@@ -117,5 +117,83 @@ if [ "$C_ONLY" = true ]; then
     exit 0
 fi
 
-# Part B (R package) is appended in Task 2, before the final summary line below.
+run_r_test() {
+    if ! command -v Rscript >/dev/null 2>&1; then
+        echo -e "${RED}FAIL: Rscript not found; R package OpenMP check cannot run.${NC}"
+        return 4
+    fi
+
+    local pkg="$TMP/ompcheck" lib="$TMP/lib"
+    mkdir -p "$pkg/R" "$pkg/src" "$lib"
+
+    cat > "$pkg/DESCRIPTION" <<'EOF'
+Package: ompcheck
+Version: 0.0.1
+Title: OpenMP CI Correctness Probe
+Description: Minimal package running a parallel reduction to verify OpenMP.
+Authors@R: person("CI", "Probe", email = "ci@example.com", role = c("aut", "cre"))
+License: AGPL (>= 3)
+EOF
+
+    printf 'useDynLib(ompcheck, .registration = TRUE)\nexport(omp_sum)\n' > "$pkg/NAMESPACE"
+    printf 'omp_sum <- function(n) .Call(C_omp_sum, as.numeric(n))\n' > "$pkg/R/omp_sum.R"
+
+    # NOTE: <omp.h> MUST be included before the R headers. R's headers before
+    # omp.h break omp.h's `declare variant` parsing on recent Apple clang.
+    cat > "$pkg/src/omp_sum.c" <<'EOF'
+#include <omp.h>
+#include <R.h>
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
+
+SEXP C_omp_sum(SEXP nSEXP) {
+    long N = (long) Rf_asReal(nSEXP);
+    int observed = 0;
+    #pragma omp parallel
+    {
+        #pragma omp critical
+        { int t = omp_get_num_threads(); if (t > observed) observed = t; }
+    }
+    double sum = 0.0;
+    #pragma omp parallel for reduction(+:sum)
+    for (long i = 1; i <= N; ++i) sum += (double) i;
+    SEXP out = PROTECT(Rf_allocVector(REALSXP, 2));
+    REAL(out)[0] = sum;
+    REAL(out)[1] = (double) observed;
+    UNPROTECT(1);
+    return out;
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"C_omp_sum", (DL_FUNC) &C_omp_sum, 1},
+    {NULL, NULL, 0}
+};
+void R_init_ompcheck(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}
+EOF
+
+    echo "Building R package 'ompcheck' with OpenMP (documented flags)..."
+    if ! PKG_CPPFLAGS='-Xclang -fopenmp -I/usr/local/include' \
+         PKG_LIBS='-L/usr/local/lib -lomp' \
+         R CMD INSTALL -l "$lib" "$pkg" >/dev/null 2>"$TMP/rinstall.log"; then
+        echo -e "${RED}FAIL: R CMD INSTALL of the OpenMP package failed.${NC}"
+        sed 's/^/    /' "$TMP/rinstall.log" | tail -15
+        return 4
+    fi
+
+    echo "Running R package OpenMP check..."
+    if ! Rscript -e '.libPaths(c("'"$lib"'", .libPaths()))
+v <- ompcheck::omp_sum(1e6)
+cat(sprintf("  R result: sum=%.0f observed_threads=%d\n", v[1], as.integer(v[2])))
+stopifnot(v[1] == 1e6 * (1e6 + 1) / 2, v[2] > 1)
+cat("  R parallel reduction correct and multithreaded.\n")'; then
+        echo -e "${RED}FAIL: R OpenMP package produced a wrong or single-threaded result.${NC}"
+        return 5
+    fi
+    echo -e "${GREEN}R package OpenMP check passed.${NC}"
+}
+
+run_r_test
 echo -e "${GREEN}All OpenMP correctness checks passed.${NC}"
