@@ -8,6 +8,22 @@ cp "$DIR/install-openmp.sh" "$DIR/README.md" "$work/"
 cp "$DIR/sync-openmp.sh" "$work/"
 cp -r "$DIR/tests" "$work/tests"
 
+# Force a known OLD pre-state in the temp copy so the test is deterministic
+# regardless of what the repo's install-openmp.sh currently pins for clang 1700.
+# We rewrite only the 1700 case block in the temp copy (never the repo file).
+awk '
+  /^    1700\)/ { in1700=1 }
+  in1700 && /OPENMP_VERSION=/ && !ver_done {
+    sub(/OPENMP_VERSION="[^"]*"/, "OPENMP_VERSION=\"19.1.0\""); ver_done=1
+  }
+  in1700 && /EXPECTED_SHA1=/ && !sha_done {
+    sub(/EXPECTED_SHA1="[^"]*"/, "EXPECTED_SHA1=\"42a22fa5852bafc23ab31241d064f9be9aab8a0d\""); sha_done=1
+  }
+  in1700 && /^    ;;/ { in1700=0 }
+  { print }
+' "$work/install-openmp.sh" > "$work/install-openmp.sh.tmp" \
+  && mv "$work/install-openmp.sh.tmp" "$work/install-openmp.sh"
+
 # Run sync against the fixture, trusting page SHA (offline), writing into the temp copies.
 ( cd "$work" && OPENMP_SYNC_PAGE="tests/fixtures/page.html" OPENMP_SYNC_TRUST_PAGE=1 \
     bash sync-openmp.sh > summary.txt )
