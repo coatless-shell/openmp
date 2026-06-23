@@ -100,7 +100,7 @@ EOF
     esac
 
     local out4 obs4
-    out4=$(OMP_NUM_THREADS=4 "$TMP/omp_test")
+    out4=$(OMP_NUM_THREADS=4 "$TMP/omp_test") || true
     echo "  OMP_NUM_THREADS=4 run: $out4"
     obs4=$(printf '%s\n' "$out4" | sed -n 's/.*observed_threads=\([0-9]*\).*/\1/p')
     if [ "$obs4" != "4" ]; then
