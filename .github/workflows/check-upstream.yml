@@ -26,7 +26,7 @@ jobs:
         run: bash tests/run-tests.sh
 
       - name: Open PR on change
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/sync-openmp-upstream
           title: "chore: sync OpenMP versions from upstream"
