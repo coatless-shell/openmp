@@ -111,8 +111,75 @@ replace_block() {
   ' "$file" > "$tmp" && mv "$tmp" "$file"
 }
 
+# Build resolved records (compute-on-change) and the per-tier summary.
+# Writes resolved records to stdout; appends summary lines to the file named by $1.
+resolve_records() {
+  local summary_file="$1" install="$2" page_records="$3"
+  while IFS=$'\t' read -r clang ver darwin sha_page xcode; do
+    local pin cur_ver cur_sha sha
+    pin=$(current_pin "$clang" "$install")
+    cur_ver=$(printf '%s' "$pin" | cut -f1); cur_sha=$(printf '%s' "$pin" | cut -f2)
+    if [ "$cur_ver" = "$ver" ] && [ -n "$cur_sha" ]; then
+      sha="$cur_sha"
+    else
+      sha=$(resolve_sha "$ver" "$darwin" "$sha_page") || return 1
+      if [ -z "$cur_ver" ]; then echo "NEW $clang: $ver" >> "$summary_file"
+      else echo "UPDATED $clang: $cur_ver -> $ver" >> "$summary_file"; fi
+    fi
+    printf '%s\t%s\t%s\t%s\t%s\n' "$clang" "$ver" "$darwin" "$sha" "$xcode"
+  done <<< "$page_records"
+}
+
 main() {
-  : # implemented in Task 6
+  local check=0
+  [ "${1:-}" = "--check" ] && check=1
+
+  local script_dir install readme page records summary
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  install="$script_dir/install-openmp.sh"
+  readme="$script_dir/README.md"
+
+  page=$(mktemp)
+  if [ -n "${OPENMP_SYNC_PAGE:-}" ]; then cp "$OPENMP_SYNC_PAGE" "$page"
+  else curl -fsS "$BASE_URL/" -o "$page" || { echo "ERROR: cannot fetch $BASE_URL/" >&2; exit 1; }; fi
+
+  records=$(parse_page "$page")
+  rm -f "$page"
+  [ -n "$records" ] || { echo "ERROR: parsed zero records (page structure changed?)" >&2; exit 1; }
+
+  summary=$(mktemp)
+  local resolved
+  resolved=$(resolve_records "$summary" "$install" "$records") || { echo "ERROR: SHA resolution failed" >&2; exit 1; }
+
+  # Render blocks into temp files.
+  local f_case f_help f_readme
+  f_case=$(mktemp); f_help=$(mktemp); f_readme=$(mktemp)
+  printf '%s\n' "$resolved" | render_case   > "$f_case"
+  printf '%s\n' "$resolved" | render_help   > "$f_help"
+  printf '%s\n' "$resolved" | render_readme > "$f_readme"
+
+  if [ "$check" = 1 ]; then
+    # Apply to copies and diff; write nothing to the real files.
+    local ci cr; ci=$(mktemp); cr=$(mktemp); cp "$install" "$ci"; cp "$readme" "$cr"
+    replace_block "$ci" "BEGIN GENERATED VERSION CASES" "END GENERATED VERSION CASES" "$f_case"
+    replace_block "$ci" "BEGIN GENERATED HELP VERSIONS" "END GENERATED HELP VERSIONS" "$f_help"
+    replace_block "$cr" "BEGIN GENERATED README TABLE"  "END GENERATED README TABLE"  "$f_readme"
+    local rc=0
+    diff -q "$ci" "$install" >/dev/null || rc=1
+    diff -q "$cr" "$readme"  >/dev/null || rc=1
+    rm -f "$f_case" "$f_help" "$f_readme" "$summary" "$ci" "$cr"
+    [ "$rc" = 0 ] && echo "up to date" || echo "DRIFT: run sync-openmp.sh"
+    exit "$rc"
+  fi
+
+  replace_block "$install" "BEGIN GENERATED VERSION CASES" "END GENERATED VERSION CASES" "$f_case"
+  replace_block "$install" "BEGIN GENERATED HELP VERSIONS" "END GENERATED HELP VERSIONS" "$f_help"
+  replace_block "$readme"  "BEGIN GENERATED README TABLE"  "END GENERATED README TABLE"  "$f_readme"
+  rm -f "$f_case" "$f_help" "$f_readme"
+
+  echo "Sync complete."
+  if [ -s "$summary" ]; then cat "$summary"; else echo "No version changes."; fi
+  rm -f "$summary"
 }
 
 if [ "${OPENMP_SYNC_LIB:-}" != "1" ]; then
