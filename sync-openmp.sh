@@ -70,6 +70,47 @@ render_readme() {
   done
 }
 
+# current_pin <clang> <install_file> -> "version<TAB>sha1" or empty
+current_pin() {
+  local clang="$1" file="$2"
+  awk -v key="    ${clang})" '
+    $0==key {inblock=1; next}
+    inblock && /OPENMP_VERSION=/ {v=$0; sub(/.*OPENMP_VERSION="/,"",v); sub(/".*/,"",v)}
+    inblock && /EXPECTED_SHA1=/  {s=$0; sub(/.*EXPECTED_SHA1="/,"",s);  sub(/".*/,"",s)}
+    inblock && /;;/ {print v"\t"s; exit}
+  ' "$file"
+}
+
+sha1_of() {
+  if command -v shasum >/dev/null 2>&1; then shasum -a 1 "$1" | cut -d' ' -f1
+  else sha1sum "$1" | cut -d' ' -f1; fi
+}
+
+# resolve_sha <ver> <darwin> <page_sha>
+resolve_sha() {
+  local ver="$1" darwin="$2" page_sha="$3"
+  if [ "${OPENMP_SYNC_TRUST_PAGE:-0}" = "1" ]; then printf '%s' "$page_sha"; return 0; fi
+  local url="$BASE_URL/openmp-${ver}-${darwin}-Release.tar.gz" tmp got
+  tmp=$(mktemp)
+  if ! curl -fsS -o "$tmp" "$url"; then echo "ERROR: download failed: $url" >&2; rm -f "$tmp"; return 1; fi
+  got=$(sha1_of "$tmp"); rm -f "$tmp"
+  if [ -n "$page_sha" ] && [ "$got" != "$page_sha" ]; then
+    echo "WARN: computed SHA1 ($got) != page SHA1 ($page_sha) for $ver" >&2
+  fi
+  printf '%s' "$got"
+}
+
+# replace_block <file> <begin_substr> <end_substr> <content_file>
+replace_block() {
+  local file="$1" begin="$2" end="$3" content="$4" tmp
+  tmp=$(mktemp)
+  awk -v b="$begin" -v e="$end" -v cf="$content" '
+    index($0,b){print; while((getline line < cf)>0) print line; close(cf); skip=1; next}
+    index($0,e){skip=0; print; next}
+    !skip{print}
+  ' "$file" > "$tmp" && mv "$tmp" "$file"
+}
+
 main() {
   : # implemented in Task 6
 }
