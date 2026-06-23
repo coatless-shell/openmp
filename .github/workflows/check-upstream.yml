@@ -17,7 +17,9 @@ jobs:
 
       - name: Run sync
         id: sync
+        shell: bash
         run: |
+          set -euo pipefail
           ./sync-openmp.sh | tee sync-summary.txt
 
       - name: Run tests
