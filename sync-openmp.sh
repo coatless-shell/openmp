@@ -30,7 +30,7 @@ parse_page() {
     | tr '\n' ' ' | sed 's/<tr/\n<tr/Ig' \
     | while IFS= read -r row || [ -n "$row" ]; do
         case "$row" in
-          *"Apple clang"*) : ;;
+          "<tr"*"Apple clang"*) : ;;
           *) continue ;;
         esac
         local clang llvm rel ver darwin sha xcode
