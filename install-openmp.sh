@@ -63,6 +63,7 @@ show_help() {
     echo "    - sudo privileges for installation to /usr/local/"
     echo ""
     echo -e "${YELLOW}SUPPORTED VERSIONS:${NC}"
+    # >>> BEGIN GENERATED HELP VERSIONS (managed by sync-openmp.sh; do not edit) >>>
     echo "    Xcode 16.3+         → OpenMP 19.1.0"
     echo "    Xcode 16.0-16.2     → OpenMP 17.0.6"
     echo "    Xcode 15.x          → OpenMP 16.0.4"
@@ -75,6 +76,7 @@ show_help() {
     echo "    Xcode 11.4-11.7     → OpenMP 9.0.1"
     echo "    Xcode 11.0-11.3.1   → OpenMP 8.0.1"
     echo "    Xcode 10.2-10.3     → OpenMP 7.1.0"
+    # <<< END GENERATED HELP VERSIONS <<<
     echo ""
     echo "MORE INFO:"
     echo "    https://mac.r-project.org/openmp/"
@@ -140,6 +142,7 @@ EXPECTED_SHA1=""
 BASE_URL="https://mac.r-project.org/openmp"
 
 case $CLANG_VERSION in
+    # >>> BEGIN GENERATED VERSION CASES (managed by sync-openmp.sh; do not edit) >>>
     1700)
         OPENMP_VERSION="19.1.0"
         DARWIN_TARGET="darwin20"
@@ -200,22 +203,10 @@ case $CLANG_VERSION in
         DARWIN_TARGET="darwin17"
         EXPECTED_SHA1="6891ff6f83f2ed83eeed42160de819b50cf643cd"
         ;;
+    # <<< END GENERATED VERSION CASES <<<
     *)
         echo -e "${RED}Error: Unsupported clang version $CLANG_VERSION${NC}"
-        echo "Supported versions and their corresponding OpenMP builds:"
-        echo "  1700 (Xcode 16.3+) → OpenMP 19.1.0"
-        echo "  1600 (Xcode 16.0-16.2) → OpenMP 17.0.6"
-        echo "  1500 (Xcode 15.x) → OpenMP 16.0.4"
-        echo "  1403 (Xcode 14.3.x) → OpenMP 15.0.7"
-        echo "  1400 (Xcode 14.0-14.2) → OpenMP 14.0.6"
-        echo "  1316 (Xcode 13.3-13.4.1) → OpenMP 13.0.0"
-        echo "  1300 (Xcode 13.0-13.2.1) → OpenMP 12.0.1"
-        echo "  1205 (Xcode 12.5) → OpenMP 11.0.1"
-        echo "  1200 (Xcode 12.0-12.4) → OpenMP 10.0.0"
-        echo "  1103 (Xcode 11.4-11.7) → OpenMP 9.0.1"
-        echo "  1100 (Xcode 11.0-11.3.1) → OpenMP 8.0.1"
-        echo "  1001 (Xcode 10.2-10.3) → OpenMP 7.1.0"
-        echo ""
+        echo "Run '$0 --help' to see the supported Xcode/clang/OpenMP versions."
         echo "Please check https://mac.r-project.org/openmp/ for updates."
         exit 1
         ;;
