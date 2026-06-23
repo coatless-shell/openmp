@@ -64,18 +64,18 @@ show_help() {
     echo ""
     echo -e "${YELLOW}SUPPORTED VERSIONS:${NC}"
     # >>> BEGIN GENERATED HELP VERSIONS (managed by sync-openmp.sh; do not edit) >>>
-    echo "    Xcode 16.3+         → OpenMP 19.1.0"
-    echo "    Xcode 16.0-16.2     → OpenMP 17.0.6"
-    echo "    Xcode 15.x          → OpenMP 16.0.4"
-    echo "    Xcode 14.3.x        → OpenMP 15.0.7"
-    echo "    Xcode 14.0-14.2     → OpenMP 14.0.6"
-    echo "    Xcode 13.3-13.4.1   → OpenMP 13.0.0"
-    echo "    Xcode 13.0-13.2.1   → OpenMP 12.0.1"
-    echo "    Xcode 12.5          → OpenMP 11.0.1"
-    echo "    Xcode 12.0-12.4     → OpenMP 10.0.0"
-    echo "    Xcode 11.4-11.7     → OpenMP 9.0.1"
-    echo "    Xcode 11.0-11.3.1   → OpenMP 8.0.1"
-    echo "    Xcode 10.2-10.3     → OpenMP 7.1.0"
+    echo "    Xcode 16.3-26.3  → OpenMP 19.1.5"
+    echo "    Xcode 16.0-16.2  → OpenMP 17.0.6"
+    echo "    Xcode 15.x  → OpenMP 16.0.4"
+    echo "    Xcode 14.3.x  → OpenMP 15.0.7"
+    echo "    Xcode 14.0-14.2  → OpenMP 14.0.6"
+    echo "    Xcode 13.3-13.4.1  → OpenMP 13.0.0"
+    echo "    Xcode 13.0-13.2.1  → OpenMP 12.0.1"
+    echo "    Xcode 12.5  → OpenMP 11.0.1"
+    echo "    Xcode 12.0-12.4  → OpenMP 10.0.0"
+    echo "    Xcode 11.4-11.7  → OpenMP 9.0.1"
+    echo "    Xcode 11.0-11.3.1  → OpenMP 8.0.1"
+    echo "    Xcode 10.2-10.3  → OpenMP 7.1.0"
     # <<< END GENERATED HELP VERSIONS <<<
     echo ""
     echo "MORE INFO:"
@@ -144,9 +144,9 @@ BASE_URL="https://mac.r-project.org/openmp"
 case $CLANG_VERSION in
     # >>> BEGIN GENERATED VERSION CASES (managed by sync-openmp.sh; do not edit) >>>
     1700)
-        OPENMP_VERSION="19.1.0"
+        OPENMP_VERSION="19.1.5"
         DARWIN_TARGET="darwin20"
-        EXPECTED_SHA1="42a22fa5852bafc23ab31241d064f9be9aab8a0d"
+        EXPECTED_SHA1="5b44175bcbaa334b0c57391482e068ea185c95a2"
         ;;
     1600)
         OPENMP_VERSION="17.0.6"

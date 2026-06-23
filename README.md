@@ -38,7 +38,7 @@ chmod +x uninstall-openmp.sh
 | Xcode Version | Apple Clang | OpenMP Version | Download |
 |---------------|-------------|----------------|----------|
 <!-- >>> BEGIN GENERATED README TABLE (managed by sync-openmp.sh; do not edit) >>> -->
-| 16.3+ | 1700.x | 19.1.0 | [openmp-19.1.0-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-19.1.0-darwin20-Release.tar.gz) |
+| 16.3-26.3 | 1700.x | 19.1.5 | [openmp-19.1.5-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-19.1.5-darwin20-Release.tar.gz) |
 | 16.0-16.2 | 1600.x | 17.0.6 | [openmp-17.0.6-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-17.0.6-darwin20-Release.tar.gz) |
 | 15.x | 1500.x | 16.0.4 | [openmp-16.0.4-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-16.0.4-darwin20-Release.tar.gz) |
 | 14.3.x | 1403.x | 15.0.7 | [openmp-15.0.7-darwin20-Release.tar.gz](https://mac.r-project.org/openmp/openmp-15.0.7-darwin20-Release.tar.gz) |
