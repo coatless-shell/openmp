@@ -89,7 +89,7 @@ EOF
     fi
 
     local out rc
-    out=$("$TMP/omp_test"); rc=$?
+    out=$("$TMP/omp_test") && rc=0 || rc=$?
     echo "  default run: $out"
     case $rc in
         0) ;;
