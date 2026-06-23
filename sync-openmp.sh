@@ -48,6 +48,28 @@ parse_page() {
       done | sort -t"$(printf '\t')" -k1,1nr
 }
 
+# All renderers read records (clang ver darwin sha xcode) from stdin.
+render_case() {
+  while IFS=$'\t' read -r clang ver darwin sha xcode; do
+    printf '    %s)\n        OPENMP_VERSION="%s"\n        DARWIN_TARGET="%s"\n        EXPECTED_SHA1="%s"\n        ;;\n' \
+      "$clang" "$ver" "$darwin" "$sha"
+  done
+}
+
+render_help() {
+  while IFS=$'\t' read -r clang ver darwin sha xcode; do
+    printf '    echo "    %s  → OpenMP %s"\n' "$xcode" "$ver"
+  done
+}
+
+render_readme() {
+  while IFS=$'\t' read -r clang ver darwin sha xcode; do
+    local short="${xcode#Xcode }"
+    local file="openmp-${ver}-${darwin}-Release.tar.gz"
+    printf '| %s | %s.x | %s | [%s](%s/%s) |\n' "$short" "$clang" "$ver" "$file" "$BASE_URL" "$file"
+  done
+}
+
 main() {
   : # implemented in Task 6
 }
