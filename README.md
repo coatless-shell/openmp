@@ -184,6 +184,11 @@ Common issues and solutions:
 
 Consider using the [`{macrtools}` _R_ package](https://github.com/coatless-mac/macrtools) to setup the development toolchain directly from _R_.
 
+### Blog posts
+
+- [Lightweight Alternative to Setup, Run Diagnostics, and Uninstall OpenMP on macOS using Apple's Xcode Toolchain](https://blog.thecoatlessprofessor.com/programming/cpp/lightweight-alternative-to-setup-run-diagnostics-and-uninstall-openmp-on-macos-using-apple-s-xcode-toolchain/) — the original announcement of these scripts.
+- [OpenMP for macOS - Upstream Sync, OpenMP 19.1.5, and Correctness CI](https://blog.thecoatlessprofessor.com/software-releases/shell/openmp/openmp-macos-upstream-sync-and-correctness-ci/) — release notes for the upstream-sync mechanism and OpenMP correctness CI.
+
 ## License
 
 AGPL (>= 3)
