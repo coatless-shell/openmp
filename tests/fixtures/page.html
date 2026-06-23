@@ -1,0 +1,239 @@
+<html>
+  <head>
+    <title>OpenMP on macOS with Xcode tools</title>
+    <link rel=stylesheet href='../main.css' type='text/css'>
+  </head>
+  <body bgcolor="white">
+    <h1>OpenMP on macOS with Xcode tools</h1>
+    <p>
+      <div class="warn" style="padding: 10px">
+	<b>Warning!</b> Everything described on this page is strictly
+	experimental and not officially supported by Apple.
+	It may break at any time. The information is
+	provided in the hope of being useful to some tech-savvy
+	people. It is not intended for the regular R user.
+      </div>
+    <p>
+      For those impatient, skip to <a href=#do>how to enable OpenMP in
+	packages</a>.
+    </p>
+    <h2>OpenMP support in Xcode</h2>
+    <p>
+      Apple has explicitly disabled OpenMP support in compilers that
+    they ship in Xcode:
+
+    <pre>   $ clang -c omp.c -fopenmp
+   clang: error: unsupported option '-fopenmp'</pre>
+
+    even though <tt>clang</tt> had OpenMP support for quite a long
+    time now (great thanks to the folks at Intel providing their
+    library as open source!). In fact, the clang compiler in Xcode
+    can generate all the necessary code for OpenMP. It can be tricked
+    into performing its designed function by using
+    <tt>-Xclang -fopenmp</tt> flags.
+    </p>
+    <p>
+    The unfortunate part about this is that Apple is not shipping the
+    necesssary <tt>libomp.dylib</tt> run-time library needed for
+    OpenMP support. Fortunately, some clever folks were able to
+    <a href="https://en.wikipedia.org/wiki/Xcode#Toolchain_versions">
+    match the versions</a> so we can build the binaries
+    that correspond to the <tt>clang</tt> version used. It is
+    sometimes possible to use a more recent version of the runtime
+    than the version of Apple clang. A notable exception is Xcode 16.3
+    (Apple clang 1700+) which is incompatible with previous versions.
+
+    <h2>OpenMP run-time downloads</h2>
+    The following are links to <tt>libomp</tt> OpenMP run-time built
+    from official LLVM release sources using Xcode compilers. They
+    are signed and support macOS 10.13 (High Sierra) and higher
+    (x86_64) or macOS 11 (Big Sur) or higher (arm64). All
+    tar-balls contain the system tree <tt>usr/local/lib</tt>
+    and <tt>usr/local/include</tt> so the <b>recommended installation</b> is to type in Terminal:
+    <pre>
+    curl -O https://mac.r-project.org/openmp/openmp-17.0.6-darwin20-Release.tar.gz
+    sudo tar fvxz openmp-17.0.6-darwin20-Release.tar.gz -C /</pre>
+    <p><i>NOTE:</i> Do NOT use a browser to download the tar balls, because it will quarantine the downloaded file and its contents. Modern macOS security doesn't allow the use of quarantined libraries so you'd have to remove the quarantine first with <tt>xattr -c</tt> if you do so.</p>
+    <p>The contained set of files is the same in all tar balls
+      (except 19.1.5 which adds <tt>ompx.h</tt>)
+    <pre>
+    usr/local/lib/libomp.dylib
+    usr/local/include/ompt.h
+    usr/local/include/omp.h
+    usr/local/include/omp-tools.h</pre>
+    so you can simply remove those to uninstall. Note that any package
+    you compile against <tt>libomp.dylib</tt> will need that run-time
+    so you have to ship it with your package or have users install it.
+    Note, however, that CRAN R ships with <code>libomp.dylib</code>
+    from here in <code>$R_HOME/lib</code> (corresponding to the Xcode
+    version used on CRAN) so if you link against that location (recommended)
+    you don't have to ship it if users are using CRAN binaries of R
+    as long as you make sure you use a compatible run-time.
+    <p/>
+    You can verify the signature in the library via <tt>codetool</tt> (see below).
+    <p>
+    <table class="build noborder">
+      <thead class="build noborder"><tr><th>Build</th><th>Download</th><th>SHA1 checksum</th></tr></thead>
+      <tbody class="build noborder">
+      <tr class="build alt-2"><td><b>LLVM 19.1.5</b><br>Xcode 16.3-26.3 (Apple clang 1700.x)</td>
+	<td><a href=openmp-19.1.5-darwin20-Release.tar.gz>openmp-19.1.5-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-19.1.5-darwin20-Debug.tar.gz>openmp-19.1.5-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>5b44175bcbaa334b0c57391482e068ea185c95a2<br>759bc6348431c793b22438f6bd714af59c071036</td>
+      </tr>
+      <tr class="build alt-1"><td><b>LLVM 18.1.8</b><br>&nbsp;</td>
+	<td><a href=openmp-18.1.8-darwin20-Release.tar.gz>openmp-18.1.8-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-18.1.8-darwin20-Debug.tar.gz>openmp-18.1.8-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>b8e7b79d265310ba12672e117df48ccfd9ce0366<br>115629b4ca79af7155a0bbe76932e7a2c9f3c313</td>
+      </tr>
+      <tr class="build alt-2"><td><b>LLVM 17.0.6</b><br>Xcode 16.0-16.2 (Apple clang 1600.x)</td>
+	<td><a href=openmp-17.0.6-darwin20-Release.tar.gz>openmp-17.0.6-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-17.0.6-darwin20-Debug.tar.gz>openmp-17.0.6-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>a89cab4e763025f03a5d12a93a609ff771ad209c<br>d74afdd50cd1fb4d17bdb45c2467ffeea530b1a2</td>
+      </tr>
+      <tr class="build alt-1"><td><b>LLVM 16.0.4</b><br>Xcode 15.x (Apple clang 1500.x)</td>
+	<td><a href=openmp-16.0.4-darwin20-Release.tar.gz>openmp-16.0.4-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-16.0.4-darwin20-Debug.tar.gz>openmp-16.0.4-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>591136d3c1cc26f3a21f1202a652be911bf1a2ad<br>1253f7157f590804031095440ffd80aac016b101<td>
+      </tr>
+      <tr class="build alt-2"><td><b>LLVM 15.0.7</b><br>Xcode 14.3.x (Apple clang 1403.x)</td>
+	<td><a href=openmp-15.0.7-darwin20-Release.tar.gz>openmp-15.0.7-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-15.0.7-darwin20-Debug.tar.gz>openmp-15.0.7-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>31f0be747101b2bdce3c01b4d1c9041959bb3b27<br>17728c6592d341400bb6076add9c2524a95305b7</td>
+      </tr>
+      <tr class="build alt-1"><td><b>LLVM 14.0.6</b><br>Xcode 14.0-14.2 (Apple clang 1400.x)</td>
+	<td><a href=openmp-14.0.6-darwin20-Release.tar.gz>openmp-14.0.6-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-14.0.6-darwin20-Debug.tar.gz>openmp-14.0.6-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>19912991431ecf032f037b6e8aea19dbd490f1ba<br>6b96a15db9329ea6f605449a630575036fa20aae</td>
+      </tr>
+      <tr class="build alt-2"><td><b>LLVM 13.0.0</b><br>Xcode 13.3-13.4.1 (Apple clang 1316.x)</td>
+	<td><a href=openmp-13.0.0-darwin21-Release.tar.gz>openmp-13.0.0-darwin21-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-13.0.0-darwin21-Debug.tar.gz>openmp-13.0.0-darwin21-Debug.tar.gz</a> (Debug)</td>
+	<td>47af4cb0d1f3554969f2ec9dee450d728ea30024<br>f6f8f1f49c02d5ec0729b56ddc7eaf51e7f04714</td>
+      </tr>
+      <tr class="build alt-1"><td><b>LLVM 12.0.1</b><br>Xcode 13.0-13.2.1 (Apple clang 1300.x)</td>
+	<td><a href=openmp-12.0.1-darwin20-Release.tar.gz>openmp-12.0.1-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-12.0.1-darwin20-Debug.tar.gz>openmp-12.0.1-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>4fab53ccc420ab882119256470af15c210d19e5e<br>58b4323e7933e12cba5c2996b4c9ef27567c41d9</td>
+      </tr>
+      <!-- don't show the git build - it was replaced by LLVM 11 + M1 patch, but we still keep the files for download
+      <tr class="build alt-1"><td><b>LLVM master (96efe90)</b><br>(this was our first M1 build - only for archives)</td>
+	<td><a href=openmp-96efe90-darwin20-Release.tar.gz>openmp-96efe90-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-96efe90-darwin20-Debug.tar.gz>openmp-96efe90-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>7adbe88c8882b7ab75f090ef83f77147d1866582<br>02e1a494e39f265766443007db49fb0d80ae93e4</td>
+      </tr> -->
+      <tr class="build alt-2"><td><b>LLVM 11.0.1</b> (+M1 patch)<br>Xcode 12.5 (Apple clang 1205.x)</td>
+	<td><a href=openmp-11.0.1-darwin20-Release.tar.gz>openmp-11.0.1-darwin20-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-11.0.1-darwin20-Debug.tar.gz>openmp-11.0.1-darwin20-Debug.tar.gz</a> (Debug)</td>
+	<td>0dcd19042f01c4f552914e2cf7a53186de397aa1<br>65e83ea667c72bbe44fea699776564d2f03a080f</td>
+      </tr>
+      <tr class="build inter"><td colspan=3><center>(All binaries above include both arm64 and x86_64 and require macOS 11 or higher. Binaries below require macOS 10.13 or higher and are Intel-only)</center></td></tr>
+      <tr class="build alt-1"><td><b>LLVM 10.0.0</b><br>Xcode 12.0-12.4 (Apple clang 1200.x)</td>
+	<td><a href=openmp-10.0.0-darwin17-Release.tar.gz>openmp-10.0.0-darwin17-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-10.0.0-darwin17-Debug.tar.gz>openmp-10.0.0-darwin17-Debug.tar.gz</a> (Debug)</td>
+	<td>9bf16a64ab747528c5de7005a1ea1a9e318b3cf0<br>d4508d3f0c2952c3f984393b088e0b4beab33b58</td>
+      </tr>
+      <tr class="build alt-2"><td><b>LLVM 9.0.1</b><br>Xcode 11.4-11.7 (Apple clang 1103.x)</td>
+	<td><a href=openmp-9.0.1-darwin17-Release.tar.gz>openmp-9.0.1-darwin17-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-9.0.1-darwin17-Debug.tar.gz>openmp-9.0.1-darwin17-Debug.tar.gz</a> (Debug)</td>
+	<td>e5bd8501a3f957b4babe27b0a266d4fa15dbc23f<br>c4c8491631504fb060f7c25ec14324d02d617d5b</td>
+      </tr>
+      <tr class="build alt-1"><td><b>LLVM 8.0.1</b><br>Xcode 11.0-11.3.1 (Apple clang 1100.x)</td>
+	<td><a href=openmp-8.0.1-darwin17-Release.tar.gz>openmp-8.0.1-darwin17-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-8.0.1-darwin17-Debug.tar.gz>openmp-8.0.1-darwin17-Debug.tar.gz</a> (Debug)</td>
+	<td>e4612bfcb1bf520bf22844f7db764cadb7577c28<br>d6c83918b28405d43950d4b864ca8d1687eed4d1</td>
+      </tr>
+      <tr class="build alt-2"><td><b>LLVM 7.1.0</b><br>Xcode 10.2-10.3 (Apple clang 1001.x)</td>
+	<td><a href=openmp-7.1.0-darwin17-Release.tar.gz>openmp-7.1.0-darwin17-Release.tar.gz</a> (Release)<br>
+	  <a href=openmp-7.1.0-darwin17-Debug.tar.gz>openmp-7.1.0-darwin17-Debug.tar.gz</a> (Debug)</td>
+	<td>6891ff6f83f2ed83eeed42160de819b50cf643cd<br>34456adde62b9a1047f906e1d7f54990a1c15a34</td>
+      </tr>
+    </table>
+      
+    <h2><a name=do></a>How to enable OpenMP in packages</h2>
+    <ul><li>Download the <tt>libomp</tt> run-time corresponding to the
+	Xcode version you use from the links above</li>
+	<li>add <tt>-Xclang -fopenmp</tt> to <tt>CPPFLAGS</tt>,
+	  add <tt>-lomp</tt> to <tt>LIBS</tt></li>
+    </ul>
+    How you do the latter depends on the package, but if the package does
+    not set these environment variables itself, you can try
+    <pre>
+    PKG_CPPFLAGS='-Xclang -fopenmp' PKG_LIBS=-lomp R CMD INSTALL myPackage</pre>
+
+    If that doesn't work, please consult the package's documentation, and
+    liaise with its maintainer.
+    
+    It is also possible to add those flags globally by
+    adding the following to <tt>~/.R/Makevars</tt>:
+    <pre>
+    CPPFLAGS += -Xclang -fopenmp
+    LDFLAGS += -lomp</pre>
+
+    but be very careful when doing this, always check
+    your <tt>~/.R/Makevars</tt> whenever you upgrade R, macOS or Xcode!
+
+    <p><i>Note:</i> If you are using CRAN R binary and there is a potential
+    conflict between its run-time and your run-time (which is generally
+    a bad idea!) then you can force the use of your binary by
+    replacing <tt>-lomp</tt> above with <tt>/usr/local/lib/libomp.dylib</tt>
+    (note that lack of <tt>-l</tt>!).</p>
+    
+    <h3>Side notes</h3>
+    It may be possible in principle to build static version of the run-time.
+    That can be done via <tt>-DLIBOMP_ENABLE_SHARED=OFF</tt>, but has not been
+    tested. There is a potential for chaos when more OMP run-times get
+    loaded into one process as they may clash, in fact it is strongly
+    discouraged to use static run-time, because only one version the
+    run-time may be loaded into a process. That is why R package are
+    encouraged to use the common run-time supplied with CRAN R
+    binaries instead of shipping their own (see above).
+    <p/>
+    Another interesting test would be to
+    try <tt>-DLIBOMP_FORTRAN_MODULES=ON</tt> and see which versions
+    are compatible with the GNU Fortran used in R. We are
+    intentionally removing the <tt>gomp</tt> symlink from the binary
+    so that <tt>iomp</tt> and <tt>gomp</tt> don't conflict. Future R
+    releases may use LLVM-based Fortran complier with OpenMP support.
+    
+    <h3>License and sources</h3>
+    All sources were obtained directly from the
+    <a href="https://releases.llvm.org/download.html">LLVM releases</a>
+    and copies are also available in the <a href="src/">src</a>
+    directory (including the build script). See <tt>LICENSE.txt</tt>
+    in the sources for the corresponding license and
+    <a href="https://openmp.llvm.org/">https://openmp.llvm.org/</a>
+    for details on the OpenMP run-time.
+    
+    <h3>Verifying code signatures</h3>
+    You can use codetools to verify the signature, for example you should see:
+    <pre>
+$ codesign -d -vv /usr/local/lib/libomp.dylib 
+Executable=/usr/local/lib/libomp.dylib
+Identifier=libomp
+Format=Mach-O universal (x86_64 arm64)
+CodeDirectory v=20400 size=5514 flags=0x0(none) hashes=167+2 location=embedded
+Signature size=8927
+Authority=Developer ID Application: Simon Urbanek (VZLD955F6P)
+Authority=Developer ID Certification Authority
+Authority=Apple Root CA
+Timestamp=11/11/2021 at 1:29:04 PM
+Info.plist=not bound
+TeamIdentifier=VZLD955F6P
+Sealed Resources=none
+Internal requirements count=1 size=168
+</pre>
+    
+    <h3>Acknowledgements</h3>
+    Thanks to John Clayden, Kevin Ushey and others who contributed to the discussion and testing.
+
+    <h3>Trademark notices</h3>
+    <ul>
+      <li>The OpenMP name and the OpenMP logo are registered trademarks of
+	the OpenMP Architecture Review Board.</li>
+      <li>Intel is a trademark of Intel Corporation in the U.S. and/or other countries.</li>
+      <li>Apple, Xcode and macOS are trademarks of Apple Inc., registered in the U.S. and other countries.</li>
+    </ul>
+    <p>
+      <i>Last modified on 2025/12/11 by Simon Urbanek</i>
+  </body>
+</html>

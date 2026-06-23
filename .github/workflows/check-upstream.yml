@@ -1,0 +1,38 @@
+name: Check OpenMP upstream
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"   # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run sync
+        id: sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./sync-openmp.sh | tee sync-summary.txt
+
+      - name: Run tests
+        run: bash tests/run-tests.sh
+
+      - name: Open PR on change
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: chore/sync-openmp-upstream
+          title: "chore: sync OpenMP versions from upstream"
+          body-path: sync-summary.txt
+          commit-message: "chore: sync OpenMP versions from upstream"
+          delete-branch: true
+          add-paths: |
+            install-openmp.sh
+            README.md
