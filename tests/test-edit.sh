@@ -32,4 +32,15 @@ got2=$(cat "$tmp2")
 rm -f "$tmp2" "$content2"
 assert_eq "$got2" "$orig2" "replace_block leaves file unchanged when END marker is missing"
 
+# replace_block preserves the file's executable bit (must use portable stat:
+# GNU `stat -c %a` on Linux, BSD `stat -f %Lp` on macOS)
+tmp3=$(mktemp); content3=$(mktemp)
+printf 'head\n# >>> BEGIN GENERATED X (managed by sync-openmp.sh; do not edit) >>>\nOLD\n# <<< END GENERATED X <<<\ntail\n' > "$tmp3"
+printf 'NEW\n' > "$content3"
+chmod +x "$tmp3"
+replace_block "$tmp3" "BEGIN GENERATED X" "END GENERATED X" "$content3"
+if [ -x "$tmp3" ]; then exec_ok=yes; else exec_ok=no; fi
+rm -f "$tmp3" "$content3"
+assert_eq "$exec_ok" "yes" "replace_block preserves the executable bit"
+
 echo "PASS: test-edit"

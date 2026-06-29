@@ -112,15 +112,19 @@ replace_block() {
     echo "ERROR: replace_block: markers not found exactly once in $file (begin=$nb end=$ne)" >&2
     return 1
   fi
+  # Preserve the file's mode across the rewrite. GNU stat (Linux) uses -c '%a';
+  # BSD stat (macOS) uses -f '%Lp'. Try GNU first, then BSD; never let the
+  # wrong one's output leak into $mode (a portability bug that breaks chmod).
   local mode
-  mode=$(stat -f '%Lp' "$file" 2>/dev/null || stat -c '%a' "$file")
+  mode=$(stat -c '%a' "$file" 2>/dev/null || stat -f '%Lp' "$file" 2>/dev/null || true)
   tmp=$(mktemp)
   awk -v b="$begin" -v e="$end" -v cf="$content" '
     index($0,b){print; while((getline line < cf)>0) print line; close(cf); skip=1; next}
     index($0,e){skip=0; print; next}
     !skip{print}
   ' "$file" > "$tmp" || { rm -f "$tmp"; return 1; }
-  chmod "$mode" "$tmp" && mv "$tmp" "$file"
+  if [ -n "$mode" ]; then chmod "$mode" "$tmp"; fi
+  mv "$tmp" "$file"
 }
 
 # Build resolved records (compute-on-change) and the per-tier summary.
