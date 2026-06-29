@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000" width="866" height="1000">
+  <defs>
+    <radialGradient id="face" cx="50%" cy="40%" r="76%">
+      <stop offset="0%" stop-color="#FBFDFF"/>
+      <stop offset="62%" stop-color="#EFF4FA"/>
+      <stop offset="100%" stop-color="#E2EAF4"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="8%" y1="2%" x2="92%" y2="98%">
+      <stop offset="0%" stop-color="#36D399"/>
+      <stop offset="50%" stop-color="#4EA8FF"/>
+      <stop offset="100%" stop-color="#7B7BFF"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <polygon points="433,4 862,252 862,748 433,996 4,748 4,252" fill="url(#rim)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="url(#face)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="none" stroke="#1E2B40" stroke-opacity="0.10" stroke-width="2"/>
+
+  <!-- fork-join thread spindle (OpenMP) -->
+  <g fill="none" stroke-width="13" stroke-linecap="round" filter="url(#glow)">
+    <path d="M433,190 C238,310 238,500 433,615" stroke="#F5544A"/>
+    <path d="M433,190 C361,320 361,485 433,615" stroke="#F59E0B"/>
+    <path d="M433,190 C505,320 505,485 433,615" stroke="#10B981"/>
+    <path d="M433,190 C628,310 628,500 433,615" stroke="#3B92E8"/>
+  </g>
+  <!-- master strand (dark, for light bg) -->
+  <g stroke="#1E293B" stroke-width="14" stroke-linecap="round">
+    <line x1="433" y1="58" x2="433" y2="190"/>
+    <line x1="433" y1="615" x2="433" y2="688"/>
+  </g>
+  <circle cx="433" cy="190" r="16" fill="#1E293B"/>
+  <circle cx="433" cy="615" r="16" fill="#1E293B"/>
+
+  <!-- wordmark (dark ink) -->
+  <text x="433" y="812" text-anchor="middle"
+        font-family="Futura, 'Futura PT', 'Avenir Next', sans-serif"
+        font-weight="600" font-size="124" letter-spacing="-2" fill="#16223A">ompsh</text>
+</svg>

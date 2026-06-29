@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000" width="866" height="1000">
+  <defs>
+    <radialGradient id="face" cx="50%" cy="46%" r="74%">
+      <stop offset="0%" stop-color="#16223A"/>
+      <stop offset="62%" stop-color="#0F1A2E"/>
+      <stop offset="100%" stop-color="#0A1120"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="8%" y1="2%" x2="92%" y2="98%">
+      <stop offset="0%" stop-color="#36D399"/>
+      <stop offset="50%" stop-color="#4EA8FF"/>
+      <stop offset="100%" stop-color="#7B7BFF"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <polygon points="433,4 862,252 862,748 433,996 4,748 4,252" fill="url(#rim)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="url(#face)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="none" stroke="#9FE9D6" stroke-opacity="0.16" stroke-width="2"/>
+  <!-- centered spindle -->
+  <g fill="none" stroke-width="15" stroke-linecap="round" filter="url(#glow)">
+    <path d="M433,300 C210,440 210,640 433,770" stroke="#FF5D5D"/>
+    <path d="M433,300 C351,455 351,615 433,770" stroke="#FFB23E"/>
+    <path d="M433,300 C515,455 515,615 433,770" stroke="#36D399"/>
+    <path d="M433,300 C656,440 656,640 433,770" stroke="#4EA8FF"/>
+  </g>
+  <g stroke="#EAF2FF" stroke-width="16" stroke-linecap="round" filter="url(#glow)">
+    <line x1="433" y1="158" x2="433" y2="300"/>
+    <line x1="433" y1="770" x2="433" y2="912"/>
+  </g>
+  <circle cx="433" cy="300" r="18" fill="#EAF2FF" filter="url(#glow)"/>
+  <circle cx="433" cy="770" r="18" fill="#EAF2FF" filter="url(#glow)"/>
+</svg>

@@ -1,5 +1,7 @@
 # OpenMP Setup, Uninstall, and Checking via Shell
 
+<a href="https://github.com/coatless-shell/openmp"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/ompsh-logo-dark-animated.svg"><img src="assets/ompsh-logo-light-animated.svg" align="right" height="138" alt="ompsh — OpenMP for macOS" /></picture></a>
+
 Automatically detects your Xcode version and installs the correct OpenMP runtime from the [R CRAN macOS tools](https://mac.r-project.org/openmp/). Includes configuration testing and uninstall scripts.
 
 ## Scripts

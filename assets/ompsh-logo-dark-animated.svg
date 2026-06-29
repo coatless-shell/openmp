@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000" width="866" height="1000">
+  <defs>
+    <radialGradient id="face" cx="50%" cy="40%" r="74%">
+      <stop offset="0%" stop-color="#16223A"/><stop offset="62%" stop-color="#0F1A2E"/><stop offset="100%" stop-color="#0A1120"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="8%" y1="2%" x2="92%" y2="98%">
+      <stop offset="0%" stop-color="#36D399"/><stop offset="50%" stop-color="#4EA8FF"/><stop offset="100%" stop-color="#7B7BFF"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .flow{ opacity:0; }
+      .knot{ transform-box:fill-box; transform-origin:center; }
+      @keyframes flow{ from{ stroke-dashoffset:0 } to{ stroke-dashoffset:-1000 } }
+      @keyframes breathe{ 0%,100%{ transform:scale(1); opacity:.92 } 50%{ transform:scale(1.16); opacity:1 } }
+      @media (prefers-reduced-motion: no-preference){
+        .flow{ opacity:1; stroke-dasharray:26 974; animation:flow 1.9s linear infinite; }
+        .flow.t2{ animation-duration:1.6s; animation-delay:-.45s }
+        .flow.t3{ animation-duration:2.05s; animation-delay:-.85s }
+        .flow.t4{ animation-duration:1.72s; animation-delay:-.2s }
+        .knot{ animation:breathe 2.4s ease-in-out infinite; }
+        .knot.join{ animation-delay:.6s; }
+      }
+    </style>
+  </defs>
+
+  <polygon points="433,4 862,252 862,748 433,996 4,748 4,252" fill="url(#rim)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="url(#face)"/>
+  <polygon points="433,46 825,272 825,728 433,954 41,728 41,272" fill="none" stroke="#9FE9D6" stroke-opacity="0.16" stroke-width="2"/>
+
+  <!-- solid spindle (base) -->
+  <g fill="none" stroke-width="13" stroke-linecap="round" filter="url(#glow)">
+    <path d="M433,190 C238,310 238,500 433,615" stroke="#FF5D5D"/>
+    <path d="M433,190 C361,320 361,485 433,615" stroke="#FFB23E"/>
+    <path d="M433,190 C505,320 505,485 433,615" stroke="#36D399"/>
+    <path d="M433,190 C628,310 628,500 433,615" stroke="#4EA8FF"/>
+  </g>
+  <!-- flowing execution pulses (overlay) -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round">
+    <path class="flow t1" pathLength="1000" d="M433,190 C238,310 238,500 433,615"/>
+    <path class="flow t2" pathLength="1000" d="M433,190 C361,320 361,485 433,615"/>
+    <path class="flow t3" pathLength="1000" d="M433,190 C505,320 505,485 433,615"/>
+    <path class="flow t4" pathLength="1000" d="M433,190 C628,310 628,500 433,615"/>
+  </g>
+  <!-- master strand -->
+  <g stroke="#EAF2FF" stroke-width="14" stroke-linecap="round" filter="url(#glow)">
+    <line x1="433" y1="58" x2="433" y2="190"/><line x1="433" y1="615" x2="433" y2="688"/>
+  </g>
+  <circle class="knot fork" cx="433" cy="190" r="16" fill="#EAF2FF" filter="url(#glow)"/>
+  <circle class="knot join" cx="433" cy="615" r="16" fill="#EAF2FF" filter="url(#glow)"/>
+
+  <text x="433" y="812" text-anchor="middle"
+        font-family="Futura, 'Futura PT', 'Avenir Next', sans-serif"
+        font-weight="600" font-size="124" letter-spacing="-2" fill="#F4F8FF">ompsh</text>
+</svg>
